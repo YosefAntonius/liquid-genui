@@ -87,10 +87,169 @@ LiquidGenUI is designed for runtime UI mutations that need to be fluid, persiste
 
 ### Supported models
 
+Google, OpenAi, DeepSeek, Mistral, xAi & Anthropic - 
 <a href="https://vercel.com/ai-gateway/models" target="_blank" rel="noopener noreferrer">
   View vercel Browse AI
 </a>
 
+NIM Models -
+<a href="https://build.nvidia.com/models" target="_blank" rel="noopener noreferrer">
+  View nvidia Models
+</a>
+
+## Documentation
+
+**MyStaticApp.tsx**
+<details>
+<summary><b>View full code</b></summary>
+  
+```tsx
+export const useInventorySkills = () => {
+  const [items, setItems] = useState<Item[]>([]);
+
+  const loadItems = async () => {
+    const res = await fetch("/api/items");
+    const data = await res.json();
+    setItems(data);
+    return data;
+  };
+
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  {/* Your App Skills */}
+  const systemSkills = {
+    fetch_items: async () => {
+      return await loadItems();
+    },
+    create_item: async (payload: { name: string; quantity: number }) => {
+      const res = await fetch("/api/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      await loadItems();
+      return await res.json();
+    },
+    update_item: async (payload: { id: number; name: string; quantity: number }) => {
+      const res = await fetch(`/api/items/${payload.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      await loadItems();
+      return await res.json();
+    },
+    delete_item: async (payload: { id: number }) => {
+      const res = await fetch(`/api/items/${payload.id}`, {
+        method: "DELETE",
+      });
+      await loadItems();
+      return await res.json();
+    },
+  };
+
+  return { items, loadItems, systemSkills };
+};
+
+{/* Your Skills configuration */}
+export const configSkills = [
+  { tag: "fetch_items" },
+  { tag: "create_item", payload: { name: "string", quantity: "number" } },
+  { tag: "update_item", payload: { id: "number", name: "string", quantity: "number" } },
+  { tag: "delete_item", payload: { id: "number" } }
+];
+```
+</details>
+
+**App.tsx**
+<details>
+<summary><b>View full code</b></summary>
+  
+```tsx
+import {
+  LiquidProvider,
+  LiquidCanvas,
+  LiquidChat,
+  DefaultSkin
+} from "liquid-genui-react";
+import { MyStaticApp, useMyStaticAppSkills, configSkills } from "./MyStaticApp";
+
+{/* Your custom endpoints */}
+const engineConfig = {
+  apiEndpoint: '/api/generate-ui-stream', 
+  saveSkinRemoteApiEndpoint: '/api/skins',
+  getSkinsRemoteApiEndpoint: '/api/skins',
+  deleteSkinRemoteApiEndpoint: '/api/skins',
+  skills: configSkills,
+};
+
+const { items, loadItems, systemSkills } = useMyStaticAppSkills();
+
+<LiquidProvider 
+  config={engineConfig}
+  skills={systemSkills}
+>
+  {/* Your raw static boring site */}
+  <DefaultSkin component={MyStaticApp} items={items} loadItems={loadItems}/>
+  {/* Where magic happens */}
+  <LiquidCanvas items={items} />
+  <LiquidChat />
+</LiquidProvider>
+```
+</details>
+
+**server.ts**
+<details>
+<summary><b>View full code</b></summary>
+  
+```ts
+import { 
+  generateLiquidUI, 
+  generateLiquidUIStream, 
+  type LiquidServerConfig 
+} from "liquid-genui-server";
+
+{/* LiquidGenUI Stream Endpoint */}
+app.post('/api/generate-ui-stream', async (req, res) => {
+  try {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    const { prompt, data, availableSkills, currentHtml } = req.body;
+    const config: LiquidServerConfig = {
+      service: "google", // You can use 'nvidia' to use NIM models or (google, openai, deepseek, mistral, xai, anthropic)
+      model: "gemini-3-flash-preview", // Add your NIM models using the full model name: deepseek-ai/deepseek-v4-pro or (gemini-3.1-pro-preview, gpt-5.5-pro-2026-04-23...)
+
+      {/* Add your additional custom SafeLibraries using addSafeLibraries (optional) */}
+      {/* Or use your own libraries by adding your list with safeLibraries (optional) */}
+      addSafeLibraries: [
+        {
+          category: 'styles',
+          libs: [{ name: 'custom-library', src: '<script src="https://unpkg.com/custom-library@1.0.0"></script>' }]
+        }
+      ]
+    };
+
+    const stream = generateLiquidUIStream({ prompt, data, availableSkills, currentHtml }, config);
+
+    for await (const chunk of stream) {
+      res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+    }
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } catch (error: any) {
+    console.error('Generative UI Stream Error:', error);
+    res.write(`data: ${JSON.stringify({ error: error.message || 'Error generating UI' })}\n\n`);
+    res.end();
+  }
+});
+```
+</details>
 
 ## License
 
