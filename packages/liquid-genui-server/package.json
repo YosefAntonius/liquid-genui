@@ -18,6 +18,15 @@
         "@types/node": "^20.0.0",
         "typescript": "^5.0.0"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/YosefAntonius/liquid-genui.git",
+        "directory": "packages/liquid-genui-server"
+    },
+    "bugs": {
+        "url": "https://github.com/YosefAntonius/liquid-genui/issues"
+    },
+    "homepage": "https://github.com/YosefAntonius/liquid-genui#readme",
     "author": "Yosef Antonius",
     "license": "MIT"
 }
