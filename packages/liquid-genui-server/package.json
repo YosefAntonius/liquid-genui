@@ -1,0 +1,23 @@
+{
+    "name": "liquid-genui-server",
+    "version": "1.0.0",
+    "description": "Backend engine for LiquidGenUI skill registry and LLM orchestration.",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "ai": "^3.0.0",
+        "@ai-sdk/google": "latest",
+        "@ai-sdk/openai": "latest",
+        "@ai-sdk/anthropic": "latest",
+        "@ai-sdk/mistral": "latest"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "typescript": "^5.0.0"
+    },
+    "author": "Yosef Antonius",
+    "license": "MIT"
+}
