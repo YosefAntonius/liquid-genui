@@ -10,10 +10,11 @@
 
 # LiquidGenUI — The Generative UI Engine in realtime for React
 
-[![npm version](https://img.shields.io/npm/v/liquid-genui-react.svg?color=blue)](https://www.npmjs.com/package/liquid-genui-react)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Website](https://img.shields.io/badge/Live-Demo-000000?logo=vercel&logoColor=white)](https://liquidgenui.vercel.app/)
+[![npm version](https://img.shields.io/npm/v/liquid-genui-react.svg?color=green)](https://www.npmjs.com/package/liquid-genui-react)
+[![npm version](https://img.shields.io/npm/v/liquid-genui-server.svg?color=green)](https://www.npmjs.com/package/liquid-genui-server)
+[![Website](https://img.shields.io/badge/Website-000000?logo=vercel&logoColor=white)](https://liquidgenui.vercel.app/)
 [![Live Demo](https://img.shields.io/badge/Live-Demo-000000?logo=vercel&logoColor=white)](https://uni-airlines.vercel.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 </div>
 
