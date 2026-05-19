@@ -106,7 +106,7 @@ NIM Models -
 <summary><b>View full code</b></summary>
   
 ```tsx
-export const useInventorySkills = () => {
+export const useMyPageSkills = () => {
   const [items, setItems] = useState<Item[]>([]);
 
   const loadItems = async () => {
@@ -135,7 +135,7 @@ export const useInventorySkills = () => {
       return await res.json();
     },
     update_item: async (payload: { id: number; name: string; quantity: number }) => {
-      const res = await fetch(`/api/items/${payload.id}`, {
+      const res = await fetch(\`/api/items/\${payload.id}\`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -144,7 +144,7 @@ export const useInventorySkills = () => {
       return await res.json();
     },
     delete_item: async (payload: { id: number }) => {
-      const res = await fetch(`/api/items/${payload.id}`, {
+      const res = await fetch(\`/api/items/\${payload.id}\`, {
         method: "DELETE",
       });
       await loadItems();
@@ -157,11 +157,24 @@ export const useInventorySkills = () => {
 
 {/* Your Skills configuration */}
 export const configSkills = [
-  { tag: "fetch_items" },
-  { tag: "create_item", payload: { name: "string", quantity: "number" } },
-  { tag: "update_item", payload: { id: "number", name: "string", quantity: "number" } },
-  { tag: "delete_item", payload: { id: "number" } }
+  { tag: "fetch_items", responseSchema: [{ id: "number", name: "string", quantity: "string"}], skillDescription: "Get all products" },
+  { tag: "create_item", payload: { name: "string", quantity: "number" }, skillDescription: "Create a new product" },
+  { tag: "update_item", payload: { id: "number", name: "string", quantity: "number" }, skillDescription: "Update a product" },
+  { tag: "delete_item", payload: { id: "number" }, skillDescription: "Delete a product" }
 ];
+
+{/* Your Page importants descriptions */}
+export const projectRequeriments = "My page name its InventoryProUltra, get inventory items with quantity..."
+
+{/* Your page */}
+export function MyPage({
+    items,
+    loadItems,
+}: {
+    items: Item[];
+    loadItems: () => void;
+
+}) {...}
 ```
 </details>
 
@@ -170,35 +183,36 @@ export const configSkills = [
 <summary><b>View full code</b></summary>
   
 ```tsx
+import 'liquid-genui-react/dist/style.css';
 import {
   LiquidProvider,
   LiquidCanvas,
   LiquidChat,
   DefaultSkin
 } from "liquid-genui-react";
-import { MyStaticApp, useMyStaticAppSkills, configSkills } from "./MyStaticApp";
+import { MyPage, useMyPageSkills, configSkills, projectRequeriments, loadItems, projectId, API_BASE } from "./MyPage";
 
-{/* Your custom endpoints */}
-const engineConfig = {
-  apiEndpoint: '/api/generate-ui-stream', 
-  saveSkinRemoteApiEndpoint: '/api/skins',
-  getSkinsRemoteApiEndpoint: '/api/skins',
-  deleteSkinRemoteApiEndpoint: '/api/skins',
-  skills: configSkills,
-};
+export default function App() {
+  const { items, loadItems, systemSkills } = useMyPageSkills();
 
-const { items, loadItems, systemSkills } = useMyStaticAppSkills();
+  {/* Your custom endpoints */}
+  const engineConfig = {
+      projectId: projectId,
+      projectRequeriments: projectRequeriments,
+      apiEndpoint: `${API_BASE}/api/generate-ui-stream`
+      saveSkinRemoteApiEndpoint: `${API_BASE}/api/skins`
+      getSkinsRemoteApiEndpoint: `${API_BASE}/api/skins`
+      deleteSkinRemoteApiEndpoint: `${API_BASE}/api/skins`
+      skills: configSkills,
+  };
 
-<LiquidProvider 
-  config={engineConfig}
-  skills={systemSkills}
->
-  {/* Your raw static boring site */}
-  <DefaultSkin component={MyStaticApp} items={items} loadItems={loadItems}/>
-  {/* Where magic happens */}
-  <LiquidCanvas items={items} />
-  <LiquidChat />
-</LiquidProvider>
+  return (<LiquidProvider config={engineConfig} skills={systemSkills}>
+    {/* Your raw static boring site 👇 */}
+    <DefaultSkin component={MyPage} items={items} loadItems={loadItems}/>
+    {/* Where magic happens 👇 */}
+    <LiquidCanvas items={items} />
+    <LiquidChat />
+  </LiquidProvider>
 ```
 </details>
 
@@ -207,27 +221,20 @@ const { items, loadItems, systemSkills } = useMyStaticAppSkills();
 <summary><b>View full code</b></summary>
   
 ```ts
-import { 
-  generateLiquidUI, 
-  generateLiquidUIStream, 
-  type LiquidServerConfig 
-} from "liquid-genui-server";
+import { generateLiquidUIStream, type LiquidServerConfig } from "liquid-genui-server";
 
-{/* LiquidGenUI Stream Endpoint */}
+// --- Endpoint de Generación UI por Streaming ---
 app.post('/api/generate-ui-stream', async (req, res) => {
-  try {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.flushHeaders();
+res.setHeader('Content-Type', 'text/event-stream');
+res.setHeader('Cache-Control', 'no-cache');
+res.setHeader('Connection', 'keep-alive');
 
-    const { prompt, data, availableSkills, currentHtml } = req.body;
+    const { prompt, data, availableSkills, currentHtml, projectRequeriments } = req.body;
     const config: LiquidServerConfig = {
-      service: "google", // You can use 'nvidia' to use NIM models or (google, openai, deepseek, mistral, xai, anthropic)
+      service: "google", // You can use 'nvidia' to use NIM models or (openai, deepseek, mistral, xai, anthropic)
       model: "gemini-3-flash-preview", // Add your NIM models using the full model name: deepseek-ai/deepseek-v4-pro or (gemini-3.1-pro-preview, gpt-5.5-pro-2026-04-23...)
 
-      {/* Add your additional custom SafeLibraries using addSafeLibraries (optional) */}
+      {/* Add your additional custom SafeLibraries using addSafeLibraries (optional)*/}
       {/* Or use your own libraries by adding your list with safeLibraries (optional) */}
       addSafeLibraries: [
         {
@@ -237,16 +244,15 @@ app.post('/api/generate-ui-stream', async (req, res) => {
       ]
     };
 
-    const stream = generateLiquidUIStream({ prompt, data, availableSkills, currentHtml }, config);
-
+    const stream = generateLiquidUIStream({ prompt, data, availableSkills, currentHtml, projectRequeriments }, config);
     for await (const chunk of stream) {
-      res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+      res.write(`data: ${JSON.stringify({ chunk })}`);
     }
-    res.write('data: [DONE]\n\n');
+    res.write('data: [DONE]');
     res.end();
   } catch (error: any) {
     console.error('Generative UI Stream Error:', error);
-    res.write(`data: ${JSON.stringify({ error: error.message || 'Error generating UI' })}\n\n`);
+    res.write(`data: ${JSON.stringify({ error: error.message || 'Error generating UI' })}`);
     res.end();
   }
 });
