@@ -1,10 +1,27 @@
 {
     "name": "liquid-genui-react",
-    "version": "1.0.0",
+    "version": "1.0.8-experimental",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE",
+        "ARCHITECTURE.md"
+    ],
     "description": "The runtime generative interface engine for React.",
     "main": "dist/index.js",
+    "module": "dist/index.js",
+    "type": "module",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./dist/style.css": "./dist/style.css"
+    },
     "scripts": {
-        "build": "tsc"
+        "build": "tsc && tailwindcss -i ./src/style.css -o ./dist/style.css"
     },
     "peerDependencies": {
         "react": ">=18.0.0",
@@ -19,11 +36,12 @@
         "tailwind-merge": "^3.6.0"
     },
     "devDependencies": {
+        "@tailwindcss/cli": "^4.3.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
         "autoprefixer": "^10.5.0",
         "postcss": "^8.5.14",
         "tailwindcss": "^4.3.0",
-        "@types/react": "^19.0.0",
-        "@types/react-dom": "^19.0.0",
         "typescript": "^5.0.0"
     },
     "repository": {

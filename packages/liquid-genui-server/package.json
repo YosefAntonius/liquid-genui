@@ -1,6 +1,12 @@
 {
     "name": "liquid-genui-server",
-    "version": "1.0.0",
+    "version": "1.0.5-experimental",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE",
+        "ARCHITECTURE.md"
+    ],
     "description": "Backend engine for LiquidGenUI skill registry and LLM orchestration.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -8,11 +14,14 @@
         "build": "tsc"
     },
     "dependencies": {
-        "ai": "^3.0.0",
+        "ai": "latest",
         "@ai-sdk/google": "latest",
         "@ai-sdk/openai": "latest",
         "@ai-sdk/anthropic": "latest",
-        "@ai-sdk/mistral": "latest"
+        "@ai-sdk/mistral": "latest",
+        "@ai-sdk/deepseek": "latest",
+        "@ai-sdk/xai": "latest",
+        "@ai-sdk/openai-compatible": "latest"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",

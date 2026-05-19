@@ -7,6 +7,9 @@ export interface SkillConfig {
     method?: string;
     headers?: any;
     reloadItems?: boolean;
+    inputSchema?: any;
+    responseSchema?: any;
+    skillDescription?: string;
     function?: (payload: any) => Promise<any>;
 }
 
@@ -23,6 +26,7 @@ export interface CategoryLibraries {
 
 export interface EngineConfig {
     projectId: string;
+    projectRequeriments?: string;
     apiEndpoint?: string;
     saveSkinRemoteApiEndpoint?: string;
     getSkinsRemoteApiEndpoint?: string;
@@ -42,7 +46,7 @@ export interface SavedSkin {
 }
 
 
-interface LiquidContextType {
+export interface LiquidContextType {
     config: EngineConfig;
     systemSkills: Record<string, Function>;
     liquidHtml: string | null;

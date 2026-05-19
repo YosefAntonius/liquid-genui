@@ -53,7 +53,7 @@ export function SkinEditorModal({ initialHtml, onSave, onClose }: SkinEditorModa
               </button>
             </div>
           </div>
-          
+
           <div className="flex-1 bg-[#0a0a0a] p-4 overflow-hidden relative group">
             <textarea
               className="w-full h-full bg-[#111] text-emerald-400 font-mono text-sm p-4 rounded-xl border border-white/10 focus:border-white/30 outline-none resize-none leading-relaxed"

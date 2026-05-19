@@ -3,19 +3,20 @@ import { LiquidServerConfig } from "./LiquidServerConfig";
 import { streamText } from 'ai'
 import { getAiProvider } from './getAiProvider'
 
-export interface GenerateUIParams {
+export interface generateLiquidUIStreamParams {
     prompt: string;
     data?: any;
     availableSkills?: any[];
+    projectRequeriments?: string;
     currentHtml?: string | null;
     instructions?: string;
 }
 
 export async function* generateLiquidUIStream(
-    params: GenerateUIParams,
+    params: generateLiquidUIStreamParams,
     config: LiquidServerConfig
 ): AsyncGenerator<string, void, unknown> {
-    const { prompt, data, availableSkills, currentHtml, instructions } = params;
+    const { prompt, data, availableSkills, projectRequeriments, currentHtml, instructions } = params;
     const { service, model, safeLibraries, addSafeLibraries } = config;
 
     let finalLibraries = safeLibraries || DEFAULT_SAFE_LIBRARIES;
@@ -68,7 +69,8 @@ window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'create_item', pay
 
 REGLAS DE ESTADO CRÍTICAS:
 1. Crea una función \`renderUI()\` que tome tu variable global de datos (ej. \`items\`) y genere o actualice el DOM basado en ella.
-2. Al iniciar (window.onload), llama inmediatamente a \`fetch_items\` para asegurar la versión más reciente: \`window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'fetch_items' }, '*');\`
+2. Al iniciar (window.onload), llama inmediatamente a \`fetch_items\` o los endpoints que se necesiten para obtener los datos iniciales (por ejemplo si se necesita 
+una lista de productos y detalles de un producto,llama a los dos endpoints)  para asegurar la versión más reciente: \`window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'fetch_items' }, '*');\`
 3. CUANDO EL USUARIO EJECUTE CUALQUIER ACCIÓN DEL CRUD (crear, actualizar, borrar), realiza la acción a través de \`postMessage\`.
 4. El listener de respuestas DEBE actualizar la variable global de datos con \`fetch_items\` y repintar la UI:
 \`\`\`javascript
@@ -87,8 +89,13 @@ window.addEventListener('message', (event) => {
   }
 });
 \`\`\`
+Para fetch de datos usa la estructura de responseSchema para asegurar que los datos sean correctos al mostrarlos en la UI.
+Prevenir respuestas de fetch vacios o null para evitar errores de render.
 Asegure de hacer \`event.preventDefault()\` en los formularios de las UIs generadas
 para evitar recargar el iframe accidentalmente cuando se presione "submit".
+
+REQUERIMIENTOS DEL PROYECTO:
+${projectRequeriments}
 
 === 4. REGLAS DE DISEÑO ===
 - Todo debe ser responsivo.
@@ -100,7 +107,7 @@ para evitar recargar el iframe accidentalmente cuando se presione "submit".
 - IMPORTANTE PARA ANIMACIONES (GSAP, framer-motion, etc.): Evita aplicar animaciones que dependen del scroll o intersección, NO pongas animaciones de entrada que dependan del scroll, evita ocultar elementos estáticamente esperando una detección de scroll.
 - Evita aplicar animaciones que dependen del scroll o intersección, NO pongas animaciones de entrada que dependan del scroll, evita ocultar elementos estáticamente esperando una detección de scroll.
 - Solo si el usuario pide explícitamente la funcionalidad para generar un PDF, genera el pdf con la información de la pantalla o con lo que el usuario especifique (por ejemplo datos específicos, un rango de fechas, etc.) y con buen diseño en formato para documento formal o el diseño que el usuario especifique, y puedes usar varias hojas para que se vea bien el pdf.
-- Asegura que al abrir los modales si tengan opacity: 1, no dejes que el modal se muestre con opacity 0.
+- Asegura que al abrir los modales si tengan opacity: 1, cuida que los modales aparezcan con opacity 1.
 - Cuando te pasen links de imágenes (aunque estén en localhost) o logos usa esos links que tepasan, no otros.
 - Si se menciona que tiene modo multilenguaje y los datos solo vienen en un lenguaje, traduce el texto que falte al idioma o idiomas requeridos en un nuevo json separado para poder hacer switch a el lenguaje requerido. Guarda el estado en localstorage como: {"language": "es"} o {"language": "en"}.
 - Si se pide thema obscuro y claro cuida los contrastes de los textos con el fondo para que sea legible en ambos modos, guarda el estado en localstorage como: {"theme": "light"} o {"theme": "dark"}.

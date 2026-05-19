@@ -6,7 +6,7 @@ import { xai } from "@ai-sdk/xai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 
-export function getAiProvider(service: string, model: string) {
+export function getAiProvider(service: string, model: string): any {
     if (service === 'google') {
         return google(model);
     }

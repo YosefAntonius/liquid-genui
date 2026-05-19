@@ -9,6 +9,7 @@ export interface GenerateUIParams {
     prompt: string;
     data?: any;
     availableSkills?: any[];
+    projectRequeriments?: string;
     currentHtml?: string | null;
     instructions?: string;
 }
@@ -17,7 +18,7 @@ export async function generateLiquidUI(
     params: GenerateUIParams,
     config: LiquidServerConfig
 ): Promise<string> {
-    const { prompt, data, availableSkills, currentHtml, instructions } = params;
+    const { prompt, data, availableSkills, projectRequeriments, currentHtml, instructions } = params;
     const { service, model, safeLibraries, addSafeLibraries } = config;
 
     let finalLibraries = safeLibraries || DEFAULT_SAFE_LIBRARIES;
@@ -66,13 +67,73 @@ ${JSON.stringify(availableSkills, null, 2)}
 Ejemplo de cómo llamar a un endpoint:
 \`\`\`javascript
 window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'create_item', payload: { name: 'Item', quantity: 99 } }, '*');
+  // --- ACTIONS ---
+function updateQty(id, delta) {
+    const item = inventory.find(i => i.id === id);
+    if (!item) return;
+    const newQty = Math.max(0, parseInt(item.quantity) + delta);
+    
+    window.parent.postMessage({ 
+        type: 'LIQUID_TRIGGER', 
+        endpoint: 'update_item', 
+        payload: { id, name: item.name, quantity: newQty } 
+    }, '*');
+    
+    // Optimistic update for UI feel
+    item.quantity = newQty;
+    renderUI();
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('item-id').value;
+    const name = document.getElementById('item-name').value;
+    const quantity = parseInt(document.getElementById('item-quantity').value);
+
+    if (id) {
+        window.parent.postMessage({ 
+            type: 'LIQUID_TRIGGER', 
+            endpoint: 'update_item', 
+            payload: { id, name, quantity } 
+        }, '*');
+    } else {
+        window.parent.postMessage({ 
+            type: 'LIQUID_TRIGGER', 
+            endpoint: 'create_item', 
+            payload: { name, quantity } 
+        }, '*');
+    }
+    closeModal();
+}
+
 \`\`\`
 
 REGLAS DE ESTADO CRÍTICAS:
 1. Crea una función \`renderUI()\` que tome tu variable global de datos (ej. \`items\`) y genere o actualice el DOM basado en ella.
-2. Al iniciar (window.onload), llama inmediatamente a \`fetch_items\` para asegurar la versión más reciente: \`window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'fetch_items' }, '*');\`
+2. Al iniciar (window.onload), llama inmediatamente a \`fetch_items\` o los endpoints que se necesiten para obtener los datos iniciales (por ejemplo si se necesita 
+
+\`\`\`javascript
+window.onload = () => {
+    window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'fetch_items' }, '*');
+    renderUI();
+};
+
+// --- UI RENDERING ---
+function renderUI() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const filteredItems = inventory.filter(item => 
+        item.name.toLowerCase().includes(searchTerm)
+    );
+
+    renderStats();
+    renderTable(filteredItems);
+    renderCharts();
+    renderLowStock();
+}
+\`\`\`
+una lista de productos y detalles de un producto,llama a los dos endpoints)  para asegurar la versión más reciente: \`window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'fetch_items' }, '*');\`
 3. CUANDO EL USUARIO EJECUTE CUALQUIER ACCIÓN DEL CRUD (crear, actualizar, borrar), realiza la acción a través de \`postMessage\`.
-4. El listener de respuestas DEBE actualizar la variable global de datos con \`fetch_items\` y repintar la UI:
+4. El listener de respuestas DEBE actualizar la variable global de datos con \`fetch_items\` o cualquier otro endpoint que traiga los datos para la UI  y repintar la UI:
 \`\`\`javascript
 window.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'LIQUID_RESPONSE') {
@@ -88,9 +149,25 @@ window.addEventListener('message', (event) => {
      }
   }
 });
+
+window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'LIQUID_RESPONSE') {
+        if (event.data.endpoint === 'fetch_items') {
+            inventory = event.data.data || [];
+            renderUI();
+        } else {
+            window.parent.postMessage({ type: 'LIQUID_TRIGGER', endpoint: 'fetch_items' }, '*');
+        }
+    }
+});
 \`\`\`
+Para fetch de datos usa la estructura de responseSchema para asegurar que los datos sean correctos.
+Prevenir respuestas de fetch vacios o null para evitar errores de render.
 Asegure de hacer \`event.preventDefault()\` en los formularios de las UIs generadas
 para evitar recargar el iframe accidentalmente cuando se presione "submit".
+
+REQUERIMIENTOS DEL PROYECTO:
+${projectRequeriments}
 
 === 4. REGLAS DE DISEÑO ===
 - Todo debe ser responsivo.

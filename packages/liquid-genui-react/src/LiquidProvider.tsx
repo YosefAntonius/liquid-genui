@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { motion } from "motion/react";
+import React, { useContext, useState, useEffect, ReactNode } from "react";
 import Dexie, { type Table } from "dexie";
 import { LiquidContext, type EngineConfig, type SavedSkin } from "./LiquidContext";
 import { LiquidLayout } from "./LiquidLayout";
@@ -137,11 +136,14 @@ export const LiquidProvider = ({ config, skills = {}, children, header = false, 
       const availableSkills = (config.skills || []).map((s) => ({
         name: s.tag,
         description: s.method ? `source: ${s.source}, method: ${s.method}` : 'Function',
+        responseSchema: s.responseSchema ? JSON.stringify(s.responseSchema) : "",
+        skillDescription: s.skillDescription ? s.skillDescription : ""
       }));
 
       const requestBody = {
         prompt,
         data: contextData,
+        projectRequeriments: config.projectRequeriments,
         availableSkills,
         currentHtml: useActual ? liquidHtml : null,
         safeLibraries: config.safeLibraries,
@@ -262,7 +264,7 @@ export const LiquidProvider = ({ config, skills = {}, children, header = false, 
 
       if (res.ok) {
         const updatedSkin = { ...skin, isRemote: true };
-        
+
         // Update local state
         const newSkins = savedSkins.map(s => s.id === id ? updatedSkin : s);
         setSavedSkins(newSkins);

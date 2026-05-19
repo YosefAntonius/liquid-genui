@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLiquid } from './LiquidProvider';
 
-export function LiquidCanvas({ items, ...otherData }: { items?: any; [key: string]: any }) {
+export function LiquidCanvas({ items, ...otherData }: { items?: any;[key: string]: any }) {
   const { liquidHtml, systemSkills, setContextData, isGenerating } = useLiquid();
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -25,7 +25,7 @@ export function LiquidCanvas({ items, ...otherData }: { items?: any; [key: strin
       const doc = iframeRef.current.contentDocument;
       const bodyMatch = liquidHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
       const content = bodyMatch ? bodyMatch[1] : liquidHtml;
-      
+
       if (doc.body) {
         doc.body.innerHTML = content;
       } else {
@@ -49,15 +49,15 @@ export function LiquidCanvas({ items, ...otherData }: { items?: any; [key: strin
     const handleMessage = async (event: MessageEvent) => {
       // Ignorar mensajes que no sean del formato Liquid
       if (!event.data || event.data.type !== 'LIQUID_TRIGGER') return;
-      
+
       const { endpoint, payload } = event.data;
-      
+
       // 2. Verificar si el trigger existe en nuestro diccionario
       if (systemSkills[endpoint]) {
         try {
           // Ejecutar la función segura
           const result = await systemSkills[endpoint](payload);
-          
+
           // 3. (Opcional) Enviar la respuesta de vuelta al iframe
           if (iframeRef.current && iframeRef.current.contentWindow) {
             iframeRef.current.contentWindow.postMessage({
