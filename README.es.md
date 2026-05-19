@@ -259,6 +259,88 @@ res.setHeader('Connection', 'keep-alive');
 ```
 </details>
 
+**Ejemplo de endpoint para persistencia y manejo de Skins**
+<details>
+<summary><b>View full code</b></summary>
+
+```ts
+// --- Skins Endpoints ---
+app.get("/api/skins", async (req, res) => {
+  try {
+    const projectId = req.query.projectId as string;
+    if (!projectId) {
+      return res.status(400).json({ error: "projectId is required" });
+    }
+    const result = await db.execute({
+      sql: "SELECT * FROM skins WHERE projectId = ? ORDER BY created_at DESC",
+      args: [projectId]
+    });
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/skins", async (req, res) => {
+  try {
+    const { id, name, html, prompt, projectId } = req.body;
+    if (!id || !name || !html || !projectId) {
+      return res.status(400).json({ error: "id, name, html and projectId required" });
+    }
+    await db.execute({
+      sql: "INSERT OR REPLACE INTO skins (id, name, html, prompt, projectId) VALUES (?, ?, ?, ?, ?)",
+      args: [id, name, html, prompt || null, projectId]
+    });
+    const newSkinResult = await db.execute({
+      sql: "SELECT * FROM skins WHERE id = ?",
+      args: [id]
+    });
+    res.json(newSkinResult.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/skins/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await db.execute({
+      sql: "DELETE FROM skins WHERE id = ?",
+      args: [id]
+    });
+    res.json({ success: true, deleted_id: id });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Example table creation
+await db.execute("
+  CREATE TABLE IF NOT EXISTS skins (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    html TEXT NOT NULL,
+    prompt TEXT,
+    projectId TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+");
+```
+</details>
+
+**Variables de Entorno (API Keys)**
+```txt
+GOOGLE_GENERATIVE_AI_API_KEY="MI_API_KEY"
+NIM_API_KEY="MI_API_KEY"
+ANTHROPIC_API_KEY="MI_API_KEY"
+XAI_API_KEY="MI_API_KEY"
+DEEPSEEK_API_KEY="MI_API_KEY"
+MISTRAL_API_KEY="MI_API_KEY"
+OPENAI_API_KEY="MI_API_KEY"
+```
+<a href="https://liquidgenui.vercel.app/docs" target="_blank" rel="noopener noreferrer">
+  Vier documentation completa
+</a>
 
 ## Licencia
 
