@@ -7,5 +7,11 @@
     "scripts": {
         "build": "npm run build --workspaces",
         "test": "npm run test --workspaces"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "@parcel/watcher",
+            "esbuild"
+        ]
     }
 }
