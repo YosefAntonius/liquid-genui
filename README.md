@@ -52,10 +52,10 @@ The fastest way to get started is by installing both the React provider and the 
 
 ```bash
 # Install the Frontend Package
-npm install liquid-genui-react
+pnpm install liquid-genui-react
 
 # Install the Backend Package
-npm install liquid-genui-server
+pnpm install liquid-genui-server
 ```
 
 ## How it works
