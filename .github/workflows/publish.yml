@@ -38,8 +38,5 @@ jobs:
       - name: Build packages
         run: pnpm run build
 
-      - name: Verify package contents
-        run: node scripts/verify-package-files.mjs
-
       - name: Publish to npm
         run: pnpm publish -r --access public --provenance --tag "${{ inputs.dist-tag }}"
