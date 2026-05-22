@@ -1,6 +1,6 @@
 {
     "name": "liquid-genui-server",
-    "version": "1.0.5-experimental",
+    "version": "1.0.6-experimental",
     "files": [
         "dist",
         "README.md",

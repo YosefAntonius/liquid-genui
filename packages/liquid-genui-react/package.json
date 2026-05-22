@@ -1,6 +1,6 @@
 {
     "name": "liquid-genui-react",
-    "version": "1.0.8-experimental",
+    "version": "1.0.9-experimental",
     "files": [
         "dist",
         "README.md",
