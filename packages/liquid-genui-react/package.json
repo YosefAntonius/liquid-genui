@@ -21,7 +21,8 @@
         "./dist/style.css": "./dist/style.css"
     },
     "scripts": {
-        "build": "tsc && tailwindcss -i ./src/style.css -o ./dist/style.css"
+        "build": "tsc && tailwindcss -i ./src/style.css -o ./dist/style.css",
+        "test": "echo \"No tests written yet\" && exit 0"
     },
     "peerDependencies": {
         "react": ">=18.0.0",
